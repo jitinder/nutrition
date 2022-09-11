@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nutrition/util/AppBarData.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+
+import 'food_tab/food.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,61 +36,34 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _tabIndex = 1;
+  List tabs = [
+    Container(),
+    Food(),
+    Container(),
+  ];
+  List<AppBarData> appBarData = [
+    emptyAppBarData,
+    foodAppBarData,
+    emptyAppBarData,
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          padding: EdgeInsets.symmetric(
-            vertical: 6,
-            horizontal: 16,
-          ),
-          decoration: ShapeDecoration(
-            color: Colors.white,
-            shape: StadiumBorder(),
-          ),
-          child: Text("Today"),
-        ),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         foregroundColor: Colors.black,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.calendar_month),
-          onPressed: () {
-            print("Clicked Calendar");
-          },
-          splashRadius: 16,
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              print("Clicked Settings");
-            },
-            splashRadius: 16,
-          ),
-        ],
+        title: appBarData[_tabIndex].title,
+        leading: appBarData[_tabIndex].leading,
+        actions: appBarData[_tabIndex].actions,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              "",
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
+      body: tabs[_tabIndex],
       bottomNavigationBar: SafeArea(
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: 8),
           decoration: ShapeDecoration(
             color: Colors.white,
             shape: StadiumBorder(),
