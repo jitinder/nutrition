@@ -62,11 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: tabs[_tabIndex],
       bottomNavigationBar: SafeArea(
+        bottom: false,
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 8),
+          // margin: EdgeInsets.symmetric(horizontal: 8),
           decoration: ShapeDecoration(
             color: Colors.white,
-            shape: StadiumBorder(),
+            shape: RoundedRectangleBorder(),
           ),
           child: SalomonBottomBar(
             currentIndex: _tabIndex,
@@ -75,6 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 _tabIndex = index;
               });
             },
+            selectedItemColor: Colors.black,
+            unselectedItemColor: Colors.grey.shade400,
             items: [
               SalomonBottomBarItem(
                 icon: Icon(Icons.scale),
