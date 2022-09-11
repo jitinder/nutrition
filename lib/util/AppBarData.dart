@@ -31,7 +31,7 @@ final foodAppBarData = AppBarData(
     child: Text("Today"),
   ),
   leading: IconButton(
-    icon: Icon(Icons.calendar_month),
+    icon: Icon(Icons.trending_up),
     onPressed: () {
       print("Clicked Calendar");
     },
