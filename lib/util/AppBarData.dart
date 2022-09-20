@@ -18,6 +18,20 @@ final emptyAppBarData = AppBarData(
   ],
 );
 
+final weightAppBarData = AppBarData(
+  title: Container(
+    padding: const EdgeInsets.symmetric(
+      vertical: 6,
+      horizontal: 16,
+    ),
+    decoration: const ShapeDecoration(
+      color: Colors.white,
+      shape: StadiumBorder(),
+    ),
+    child: const Text("Weight"),
+  ),
+);
+
 final foodAppBarData = AppBarData(
   title: Container(
     padding: EdgeInsets.symmetric(

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nutrition/util/AppBarData.dart';
+import 'package:nutrition/weight_tab/weight.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 import 'food_tab/food.dart';
@@ -37,12 +38,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _tabIndex = 1;
   List tabs = [
-    Container(),
+    Weight(),
     Food(),
     Container(),
   ];
   List<AppBarData> appBarData = [
-    emptyAppBarData,
+    weightAppBarData,
     foodAppBarData,
     emptyAppBarData,
   ];
