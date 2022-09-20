@@ -19,7 +19,7 @@ class Weight extends StatelessWidget {
     return ListView(
       children: [
         dataContainer(
-          400,
+          300,
           Column(
             children: [
               const Expanded(
@@ -47,6 +47,64 @@ class Weight extends StatelessWidget {
                       )
                     ],
                     animate: false,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        dataContainer(
+          300,
+          Column(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Log",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    ActionChip(
+                      elevation: 0,
+                      label: Icon(
+                        Icons.add,
+                      ),
+                      onPressed: () {
+                        print("Add to Log");
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 6,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: DataTable(
+                    headingTextStyle: Theme.of(context).textTheme.titleSmall,
+                    horizontalMargin: 0,
+                    headingRowHeight: 30,
+                    dataRowHeight: 25,
+                    dividerThickness: 0,
+                    // columnSpacing: 5,
+                    columns: const <DataColumn>[
+                      DataColumn(
+                        label: Text("Weight (kg)"),
+                      ),
+                      DataColumn(
+                        label: Text("Date"),
+                      ),
+                    ],
+                    rows: [
+                      DataRow(
+                        cells: <DataCell>[
+                          DataCell(Text('77')),
+                          DataCell(Text('25th Aug 2022')),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
