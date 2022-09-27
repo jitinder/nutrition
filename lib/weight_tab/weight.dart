@@ -2,7 +2,9 @@ import 'package:charts_flutter/flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nutrition/util/Database.dart';
 import 'package:nutrition/util/WeightLog.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../util/DataContainer.dart';
 
@@ -16,6 +18,33 @@ class Weight extends StatefulWidget {
 
 class _WeightState extends State<Weight> {
   List<WeightLog> data = [];
+  var database;
+
+  @override
+  void initState() {
+    super.initState();
+    NutritionDB().initDB().then((db) {
+      database = db;
+      _getWeightLogsFromDB(db);
+    });
+  }
+
+  void _getWeightLogsFromDB(Database db) async {
+    List<WeightLog> weightLogs = await NutritionDB().weightLogs(db);
+    setState(() {
+      data = weightLogs;
+    });
+  }
+
+  void _addWeightLogToDB(Database db, WeightLog weightLog) async {
+    await NutritionDB().insertWeightLog(db, weightLog);
+    _getWeightLogsFromDB(db);
+  }
+
+  void _removeWeightLogFromDB(Database db, WeightLog weightLog) async {
+    await NutritionDB().removeWeightLog(db, weightLog);
+    _getWeightLogsFromDB(db);
+  }
 
   addNewWeight(BuildContext context) {
     TextEditingController controller = new TextEditingController();
@@ -48,9 +77,7 @@ class _WeightState extends State<Weight> {
               double? weight = double.tryParse(controller.text);
               if (weight != null) {
                 WeightLog log = WeightLog(weight, DateTime.now());
-                setState(() {
-                  data.add(log);
-                });
+                _addWeightLogToDB(database, log);
               }
               Navigator.pop(context);
             },
@@ -60,16 +87,49 @@ class _WeightState extends State<Weight> {
     );
   }
 
-  List<DataRow> _getTableRows() {
+  void _deleteDialog(BuildContext context, WeightLog log) {
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text("Delete Log"),
+        content: Text("Do you want to delete this log?"),
+        actions: [
+          CupertinoDialogAction(
+            child: Text("Cancel"),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          CupertinoDialogAction(
+            child: Text("Delete"),
+            isDestructiveAction: true,
+            isDefaultAction: true,
+            onPressed: () {
+              _removeWeightLogFromDB(database, log);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<DataRow> _getTableRows(
+    BuildContext context,
+  ) {
     List<DataRow> rows = [];
     for (WeightLog log in data.reversed.take(8)) {
       rows.add(DataRow(
+        onLongPress: () {
+          _deleteDialog(context, log);
+        },
         cells: <DataCell>[
           DataCell(
-            Text(Weight.dateFormat.format(log.logTime)),
+            Text(Weight.dateFormat.format(log.date)),
           ),
           DataCell(
-            Text(log.weightInKgs.toString()),
+            Text(log.weight.toString()),
           ),
         ],
       ));
@@ -104,8 +164,8 @@ class _WeightState extends State<Weight> {
                       Series<WeightLog, DateTime>(
                         id: 'Weight',
                         colorFn: (_, __) => MaterialPalette.blue.shadeDefault,
-                        domainFn: (WeightLog log, _) => log.logTime,
-                        measureFn: (WeightLog log, _) => log.weightInKgs,
+                        domainFn: (WeightLog log, _) => log.date,
+                        measureFn: (WeightLog log, _) => log.weight,
                         data: data,
                       )
                     ],
@@ -160,7 +220,7 @@ class _WeightState extends State<Weight> {
                         label: Text("Weight (kg)"),
                       ),
                     ],
-                    rows: _getTableRows(),
+                    rows: _getTableRows(context),
                   ),
                 ),
               ),
