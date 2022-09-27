@@ -1,18 +1,81 @@
 import 'package:charts_flutter/flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:nutrition/util/WeightLog.dart';
 
 import '../util/DataContainer.dart';
 
-class Weight extends StatelessWidget {
+class Weight extends StatefulWidget {
   const Weight({Key? key}) : super(key: key);
+  static DateFormat dateFormat = DateFormat('dd MMM yyyy');
 
-  static List<WeightLog> data = [
-    WeightLog(77.0, DateTime(2017, 9, 19)),
-    WeightLog(79.0, DateTime(2017, 9, 22)),
-    WeightLog(78.0, DateTime(2017, 9, 25)),
-    WeightLog(77.5, DateTime(2017, 9, 29)),
-  ];
+  @override
+  State<Weight> createState() => _WeightState();
+}
+
+class _WeightState extends State<Weight> {
+  List<WeightLog> data = [];
+
+  addNewWeight(BuildContext context) {
+    TextEditingController controller = new TextEditingController();
+    showCupertinoDialog<double>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text("Log Weight"),
+        content: Container(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: CupertinoTextField(
+            controller: controller,
+            placeholder: "Weight (kg)",
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            maxLength: 5,
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: Text("Cancel"),
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          CupertinoDialogAction(
+            child: Text("Save"),
+            isDefaultAction: true,
+            onPressed: () {
+              double? weight = double.tryParse(controller.text);
+              if (weight != null) {
+                WeightLog log = WeightLog(weight, DateTime.now());
+                setState(() {
+                  data.add(log);
+                });
+              }
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<DataRow> _getTableRows() {
+    List<DataRow> rows = [];
+    for (WeightLog log in data.reversed.take(8)) {
+      rows.add(DataRow(
+        cells: <DataCell>[
+          DataCell(
+            Text(Weight.dateFormat.format(log.logTime)),
+          ),
+          DataCell(
+            Text(log.weightInKgs.toString()),
+          ),
+        ],
+      ));
+    }
+    return rows;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +135,7 @@ class Weight extends StatelessWidget {
                         Icons.add,
                       ),
                       onPressed: () {
-                        print("Add to Log");
+                        addNewWeight(context);
                       },
                     ),
                   ],
@@ -91,20 +154,13 @@ class Weight extends StatelessWidget {
                     // columnSpacing: 5,
                     columns: const <DataColumn>[
                       DataColumn(
-                        label: Text("Weight (kg)"),
-                      ),
-                      DataColumn(
                         label: Text("Date"),
                       ),
-                    ],
-                    rows: [
-                      DataRow(
-                        cells: <DataCell>[
-                          DataCell(Text('77')),
-                          DataCell(Text('25th Aug 2022')),
-                        ],
+                      DataColumn(
+                        label: Text("Weight (kg)"),
                       ),
                     ],
+                    rows: _getTableRows(),
                   ),
                 ),
               ),
