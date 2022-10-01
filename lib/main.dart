@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:nutrition/progress_tab/progress.dart';
 import 'package:nutrition/util/AppBarData.dart';
 import 'package:nutrition/weight_tab/weight.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -17,11 +18,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SNIP',
       theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray),
-      home: const MyHomePage(title: 'Page Title'),
+      home: const MyHomePage(title: ''),
     );
   }
 }
@@ -36,21 +37,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _tabIndex = 1;
+  int _tabIndex = 0;
   List tabs = [
     Weight(),
     Food(),
-    Container(),
+    Progress(),
   ];
   List<AppBarData> appBarData = [
     weightAppBarData,
     foodAppBarData,
-    emptyAppBarData,
+    progressAppBarData,
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,

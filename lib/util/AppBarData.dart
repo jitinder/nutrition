@@ -10,6 +10,20 @@ class AppBarData {
   AppBarData({this.title, this.leading, this.actions});
 }
 
+Widget titlePill(String text) {
+  return Container(
+    padding: const EdgeInsets.symmetric(
+      vertical: 6,
+      horizontal: 16,
+    ),
+    decoration: const ShapeDecoration(
+      color: Colors.white,
+      shape: StadiumBorder(),
+    ),
+    child: Text(text),
+  );
+}
+
 final emptyAppBarData = AppBarData(
   title: Container(),
   leading: Container(),
@@ -19,31 +33,21 @@ final emptyAppBarData = AppBarData(
 );
 
 final weightAppBarData = AppBarData(
-  title: Container(
-    padding: const EdgeInsets.symmetric(
-      vertical: 6,
-      horizontal: 16,
-    ),
-    decoration: const ShapeDecoration(
-      color: Colors.white,
-      shape: StadiumBorder(),
-    ),
-    child: const Text("Weight"),
-  ),
+  title: titlePill("Weight"),
 );
 
-final foodAppBarData = AppBarData(
-  title: Container(
-    padding: EdgeInsets.symmetric(
-      vertical: 6,
-      horizontal: 16,
-    ),
-    decoration: ShapeDecoration(
-      color: Colors.white,
-      shape: StadiumBorder(),
-    ),
-    child: Text("Today"),
+final progressAppBarData = AppBarData(title: titlePill("Progress"), actions: [
+  IconButton(
+    icon: Icon(Icons.add_a_photo),
+    onPressed: () {
+      print("Clicked Add");
+    },
+    splashRadius: 16,
   ),
+]);
+
+final foodAppBarData = AppBarData(
+  title: titlePill("Today"),
   leading: IconButton(
     icon: Icon(Icons.trending_up),
     onPressed: () {

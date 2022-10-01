@@ -1,5 +1,5 @@
 name: nutrition
-description: Nutrition Assistant
+description: Sid's Nutrition and Progress
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -40,6 +40,7 @@ dependencies:
   salomon_bottom_bar: ^3.3.1
   charts_flutter: ^0.12.0
   intl: ^0.17.0
+  openfoodfacts: ^1.25.0
 
 dev_dependencies:
   flutter_test:

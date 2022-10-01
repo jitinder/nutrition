@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:nutrition/util/constants.dart';
 
 import '../util/DataContainer.dart';
+import '../util/constants.dart';
+import 'add_food.dart';
 
 class Food extends StatefulWidget {
   const Food({Key? key}) : super(key: key);
@@ -11,6 +12,26 @@ class Food extends StatefulWidget {
 }
 
 class _FoodState extends State<Food> {
+  double _keyboardHeight(BuildContext context) {
+    if (MediaQuery.of(context).viewInsets.bottom > 0) {
+      return MediaQuery.of(context).viewInsets.bottom - 100;
+    }
+    return 0;
+  }
+
+  void _showAddFoodBox(BuildContext context, String mealName) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => Container(
+              height: 500 + _keyboardHeight(context), // Keyboard movement
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
+              child: AddFoodPopup(mealName),
+            ));
+  }
+
   Widget _macrosBox(String name, double progress, Color color, int currentValue,
       int maxValue) {
     return Container(
@@ -78,7 +99,7 @@ class _FoodState extends State<Food> {
                   ),
                 ),
                 onPressed: () {
-                  print("Add to $mealName");
+                  _showAddFoodBox(context, mealName);
                 },
               ),
             ],
