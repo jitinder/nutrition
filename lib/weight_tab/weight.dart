@@ -170,6 +170,10 @@ class _WeightState extends State<Weight> {
                       )
                     ],
                     animate: false,
+                    primaryMeasureAxis: const NumericAxisSpec(
+                      tickProviderSpec:
+                          BasicNumericTickProviderSpec(zeroBound: false),
+                    ),
                   ),
                 ),
               ),

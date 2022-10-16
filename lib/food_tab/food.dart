@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nutrition/util/FoodItem.dart';
 
 import '../util/DataContainer.dart';
 import '../util/constants.dart';
@@ -12,11 +13,23 @@ class Food extends StatefulWidget {
 }
 
 class _FoodState extends State<Food> {
+  Map<String, List<FoodItem>> mealsMap = {};
+
   double _keyboardHeight(BuildContext context) {
     if (MediaQuery.of(context).viewInsets.bottom > 0) {
       return MediaQuery.of(context).viewInsets.bottom - 100;
     }
     return 0;
+  }
+
+  void _addToMeal(String mealName, FoodItem item) {
+    if (!mealsMap.containsKey(mealName)) {
+      mealsMap[mealName] = [];
+    }
+    setState(() {
+      mealsMap[mealName]?.add(item);
+    });
+    print("MealsMap: $mealsMap");
   }
 
   void _showAddFoodBox(BuildContext context, String mealName) {
@@ -28,7 +41,7 @@ class _FoodState extends State<Food> {
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
-              child: AddFoodPopup(mealName),
+              child: AddFoodPopup(mealName, _addToMeal),
             ));
   }
 
@@ -78,36 +91,26 @@ class _FoodState extends State<Food> {
   }
 
   Widget _mealBox(String mealName) {
+    List<FoodItem> items = mealsMap[mealName] ?? [];
     return Column(
       children: [
-        Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                mealName,
-                style: Theme.of(context).textTheme.titleLarge,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              mealName,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            ActionChip(
+              elevation: 0,
+              label: Icon(
+                Icons.add,
               ),
-              ActionChip(
-                elevation: 0,
-                label: Align(
-                  alignment: Alignment.topCenter,
-                  child: Icon(
-                    Icons.add,
-                    size: 20,
-                  ),
-                ),
-                onPressed: () {
-                  _showAddFoodBox(context, mealName);
-                },
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(),
+              onPressed: () {
+                _showAddFoodBox(context, mealName);
+              },
+            ),
+          ],
         ),
         Expanded(
           flex: 4,
@@ -115,11 +118,12 @@ class _FoodState extends State<Food> {
             alignment: Alignment.topLeft,
             child: DataTable(
               headingTextStyle: Theme.of(context).textTheme.titleSmall,
+              dataTextStyle: Theme.of(context).textTheme.bodyMedium,
               horizontalMargin: 0,
               headingRowHeight: 30,
-              dataRowHeight: 25,
+              dataRowHeight: 40,
               dividerThickness: 0,
-              // columnSpacing: 5,
+              columnSpacing: 10,
               columns: const <DataColumn>[
                 DataColumn(
                   label: Text("Item"),
@@ -130,30 +134,59 @@ class _FoodState extends State<Food> {
                 ),
                 DataColumn(
                   label: Text("C"),
+                  numeric: true,
                 ),
                 DataColumn(
                   label: Text("P"),
+                  numeric: true,
                 ),
                 DataColumn(
                   label: Text("F"),
+                  numeric: true,
                 ),
               ],
-              rows: [
-                DataRow(
-                  cells: <DataCell>[
-                    DataCell(Text('Name')),
-                    DataCell(Text('100')),
-                    DataCell(Text('5')),
-                    DataCell(Text('10')),
-                    DataCell(Text('15')),
-                  ],
-                ),
-              ],
+              rows: items
+                  .map(
+                    (item) => DataRow(
+                      cells: <DataCell>[
+                        DataCell(
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: 150,
+                            ),
+                            child: Text(
+                              item.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Text(item.kcal.toStringAsFixed(1)),
+                        ),
+                        DataCell(
+                          Text(item.carb.toStringAsFixed(1)),
+                        ),
+                        DataCell(
+                          Text(item.protein.toStringAsFixed(1)),
+                        ),
+                        DataCell(
+                          Text(item.fat.toStringAsFixed(1)),
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
             ),
           ),
         ),
       ],
     );
+  }
+
+  double _getMealBoxHeight(String meal) {
+    int items = mealsMap[meal]?.length ?? 0;
+    return (125 + (40 * items)).toDouble();
   }
 
   @override
@@ -218,7 +251,7 @@ class _FoodState extends State<Food> {
         ),
         ...mealNames
             .map(
-              (meal) => dataContainer(200, _mealBox(meal)),
+              (meal) => dataContainer(_getMealBoxHeight(meal), _mealBox(meal)),
             )
             .toList(),
       ],

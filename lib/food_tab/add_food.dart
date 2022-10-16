@@ -9,7 +9,9 @@ import '../util/AppBarData.dart';
 
 class AddFoodPopup extends StatefulWidget {
   final String mealName;
-  const AddFoodPopup(this.mealName, {Key? key}) : super(key: key);
+  final Function(String, FoodItem) addToMeal;
+  const AddFoodPopup(this.mealName, this.addToMeal, {Key? key})
+      : super(key: key);
 
   @override
   State<AddFoodPopup> createState() => _AddFoodPopupState();
@@ -17,6 +19,10 @@ class AddFoodPopup extends StatefulWidget {
 
 class _AddFoodPopupState extends State<AddFoodPopup> {
   TextEditingController searchController = TextEditingController();
+  TextEditingController portionController =
+      TextEditingController(text: "100.0");
+  double portionSize = 100.0;
+  List<FoodItem> foodItems = [];
 
   _getOpenFoodItem(ProductSearchQueryConfiguration configuration) async {
     SearchResult result =
@@ -28,8 +34,11 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
         product.nutriments?.carbohydrates ?? -1,
         product.nutriments?.proteins ?? -1,
         product.nutriments?.fat ?? -1,
+        100.0,
       );
-      print(item);
+      setState(() {
+        foodItems.add(item);
+      });
     });
   }
 
@@ -42,7 +51,7 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
           Flexible(
             child: Container(
               child: titlePill("Add Food to ${widget.mealName}"),
-              margin: EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 16),
             ),
           ),
           Flexible(
@@ -59,6 +68,7 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
                         SearchTerms(
                           terms: [text],
                         ),
+                        const PageSize(size: 10),
                       ];
                       ProductSearchQueryConfiguration configuration =
                           ProductSearchQueryConfiguration(
@@ -74,7 +84,7 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
                 ),
                 Expanded(
                   child: CupertinoButton(
-                    child: Icon(CupertinoIcons.barcode_viewfinder),
+                    child: const Icon(CupertinoIcons.barcode_viewfinder),
                     onPressed: () {
                       print("Search by Barcode");
                     },
@@ -84,22 +94,49 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
             ),
           ),
           Flexible(
-            child: CupertinoTextField(
-              placeholder: "Portion Size (g)",
-              decoration: BoxDecoration(
-                color: Colors.white54,
-              ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: FittedBox(
+                    child: Text("Portion Size (g): "),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: CupertinoTextField(
+                    controller: portionController,
+                    decoration: const BoxDecoration(
+                      color: Colors.white54,
+                    ),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (value) {
+                      setState(() {
+                        portionSize =
+                            double.tryParse(portionController.text) ?? 100.0;
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
-            flex: 5,
+            flex: 7,
             child: Container(
               color: Colors.white54,
-              margin: EdgeInsets.symmetric(vertical: 16),
+              margin: const EdgeInsets.symmetric(vertical: 16),
               child: ListView.separated(
                 itemBuilder: (BuildContext context, int index) {
+                  FoodItem item = foodItems[index];
                   return ListTile(
-                    title: Text(index.toString()),
+                    title: Text(item.name),
+                    subtitle: Text(item.printMacros(
+                        double.tryParse(portionController.text) ?? 0)),
+                    onTap: () {
+                      widget.addToMeal(widget.mealName, item);
+                      Navigator.pop(context);
+                    },
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {
@@ -108,14 +145,8 @@ class _AddFoodPopupState extends State<AddFoodPopup> {
                     height: 1,
                   );
                 },
-                itemCount: 2,
+                itemCount: foodItems.length,
               ),
-            ),
-          ),
-          Flexible(
-            child: CupertinoButton.filled(
-              child: Text("Add"),
-              onPressed: () {},
             ),
           ),
         ],
