@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nutrition/util/FoodItem.dart';
+import 'package:nutrition/util/Macros.dart';
 
 import '../util/DataContainer.dart';
 import '../util/constants.dart';
@@ -14,12 +15,29 @@ class Food extends StatefulWidget {
 
 class _FoodState extends State<Food> {
   Map<String, List<FoodItem>> mealsMap = {};
+  Macros targetMacros = Macros(2200, 200, 200, 200);
+  Macros currentMacros = Macros.empty();
 
   double _keyboardHeight(BuildContext context) {
     if (MediaQuery.of(context).viewInsets.bottom > 0) {
       return MediaQuery.of(context).viewInsets.bottom - 100;
     }
     return 0;
+  }
+
+  void _calculateCurrentMacros() {
+    Macros tempMacros = Macros.empty();
+    for (String meal in mealNames) {
+      for (FoodItem item in mealsMap[meal] ?? []) {
+        tempMacros.cals += item.kcal;
+        tempMacros.carb += item.carb;
+        tempMacros.protein += item.protein;
+        tempMacros.fat += item.fat;
+      }
+    }
+    setState(() {
+      currentMacros = tempMacros;
+    });
   }
 
   void _addToMeal(String mealName, FoodItem item) {
@@ -29,7 +47,7 @@ class _FoodState extends State<Food> {
     setState(() {
       mealsMap[mealName]?.add(item);
     });
-    print("MealsMap: $mealsMap");
+    _calculateCurrentMacros();
   }
 
   void _showAddFoodBox(BuildContext context, String mealName) {
@@ -45,8 +63,7 @@ class _FoodState extends State<Food> {
             ));
   }
 
-  Widget _macrosBox(String name, double progress, Color color, int currentValue,
-      int maxValue) {
+  Widget _macrosBox(String name, Color color, int currentValue, int maxValue) {
     return Container(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -76,7 +93,7 @@ class _FoodState extends State<Food> {
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: LinearProgressIndicator(
-              value: progress,
+              value: currentValue / maxValue,
               color: color,
               backgroundColor: color.withOpacity(0.3),
             ),
@@ -205,7 +222,7 @@ class _FoodState extends State<Food> {
               const Text("Calories"),
               Center(
                 child: Text(
-                  "2200",
+                  currentMacros.cals.toStringAsFixed(0),
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         color: Colors.black,
                       ),
@@ -218,30 +235,27 @@ class _FoodState extends State<Food> {
                     flex: 1,
                     child: _macrosBox(
                       "Carbohydrate",
-                      0.5,
                       Colors.teal,
-                      100,
-                      200,
+                      currentMacros.carb.round(),
+                      targetMacros.carb.round(),
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: _macrosBox(
                       "Protein",
-                      0.7,
                       Colors.blueAccent,
-                      140,
-                      200,
+                      currentMacros.protein.round(),
+                      targetMacros.protein.round(),
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: _macrosBox(
                       "Fat",
-                      0.4,
                       Colors.indigoAccent,
-                      80,
-                      200,
+                      currentMacros.fat.round(),
+                      targetMacros.fat.round(),
                     ),
                   ),
                 ],
