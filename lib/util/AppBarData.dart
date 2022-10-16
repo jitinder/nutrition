@@ -48,13 +48,6 @@ final progressAppBarData = AppBarData(title: titlePill("Progress"), actions: [
 
 final foodAppBarData = AppBarData(
   title: titlePill("Today"),
-  leading: IconButton(
-    icon: Icon(Icons.trending_up),
-    onPressed: () {
-      print("Clicked Calendar");
-    },
-    splashRadius: 16,
-  ),
   actions: [
     IconButton(
       icon: Icon(Icons.settings),

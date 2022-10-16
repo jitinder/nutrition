@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:nutrition/util/Database.dart';
 import 'package:nutrition/util/FoodItem.dart';
 import 'package:nutrition/util/Macros.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../util/DataContainer.dart';
 import '../util/constants.dart';
@@ -15,8 +17,34 @@ class Food extends StatefulWidget {
 
 class _FoodState extends State<Food> {
   Map<String, List<FoodItem>> mealsMap = {};
-  Macros targetMacros = Macros(2200, 200, 200, 200);
+  Macros targetMacros =
+      Macros(DateTime.fromMillisecondsSinceEpoch(0), 2200, 200, 200, 200);
   Macros currentMacros = Macros.empty();
+  var database;
+
+  @override
+  void initState() {
+    super.initState();
+    NutritionDB().initDB().then((db) {
+      database = db;
+      _getMacrosLogsFromDB(db);
+    });
+  }
+
+  void _getMacrosLogsFromDB(Database db) async {
+    List<Macros> macros = await NutritionDB().macrosLogs(db);
+    if (macros.length <= 0) {
+      return;
+    }
+    setState(() {
+      currentMacros = macros.last;
+    });
+  }
+
+  void _addMacrosToDB(Database db, Macros macros) async {
+    await NutritionDB().insertMacrosLog(db, macros);
+    _getMacrosLogsFromDB(db);
+  }
 
   double _keyboardHeight(BuildContext context) {
     if (MediaQuery.of(context).viewInsets.bottom > 0) {
@@ -27,6 +55,7 @@ class _FoodState extends State<Food> {
 
   void _calculateCurrentMacros() {
     Macros tempMacros = Macros.empty();
+    tempMacros.date = currentMacros.date;
     for (String meal in mealNames) {
       for (FoodItem item in mealsMap[meal] ?? []) {
         tempMacros.cals += item.kcal;
@@ -38,6 +67,7 @@ class _FoodState extends State<Food> {
     setState(() {
       currentMacros = tempMacros;
     });
+    _addMacrosToDB(database, currentMacros);
   }
 
   void _addToMeal(String mealName, FoodItem item) {
